@@ -139,10 +139,8 @@ const login = async (req, res, next) => {
                 return res.status(403).json({ message: "Refresh token invalid" });
             }
     
-            // Generar un nuevo token de acceso
             const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "30s" });
     
-            // Establecer el nuevo token de acceso en una cookie
             res.cookie("authToken", accessToken, {
                 path: '/',
                 expires: new Date(Date.now() + 1000 * 30),
@@ -150,7 +148,6 @@ const login = async (req, res, next) => {
                 sameSite: "lax"
             });
     
-            // Continuar con la solicitud
             req.id = user.id;
             req.role = user.role;
             next();
@@ -167,7 +164,7 @@ const login = async (req, res, next) => {
                 return res.status(404).json({ message: "User not found." });
             }
     
-            // Cambiar el estado del usuario
+
             userToToggle.status = userToToggle.status === 1 ? 0 : 1;
             await userToToggle.save();
     
@@ -179,20 +176,21 @@ const login = async (req, res, next) => {
         }
     };
     
-    // Función para crear nuevos administradores
-    const createAdmin = async (req, res, next) => {
-        const { email } = req.body;
-        // console.log(req.body)
+
+    const changeUserRole = async (req, res, next) => {
+        const userId = req.params.userId;
+        const { role } = req.body;
+    
         try {
-            const existingUser = await User.findOne({ email: email });
-            if (!existingUser) {
+            const user = await User.findById(userId);
+            if (!user) {
                 return res.status(404).json({ message: "User not found." });
             }
     
-            existingUser.role = 'admin'; // Asignar rol de administrador al usuario existente
-            await existingUser.save();
+            user.role = role;
+            await user.save();
     
-            return res.status(200).json({ message: "User promoted to admin successfully." });
+            return res.status(200).json({ message: "User role updated successfully." });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: "Internal Server Error" });
@@ -242,7 +240,7 @@ const login = async (req, res, next) => {
 
     const getAllUsers = async (req, res, next) => {
         try {
-            const users = await User.find({}, '-password'); // Excluimos el campo de contraseña
+            const users = await User.find({}, '-password');
             res.status(200).json({ users });
         } catch (error) {
             console.error(error);
@@ -250,6 +248,44 @@ const login = async (req, res, next) => {
         }
     };
     
+    const updateUser = async (req, res, next) => {
+        const userId = req.params.userId;
+        const { name, email, password } = req.body;
+        console.log('updating')
+        try {
+            // Buscar el usuario por su ID
+            const userToUpdate = await User.findById(userId);
+            if (!userToUpdate) {
+                return res.status(404).json({ message: "User not found." });
+            }
+    
+            // Verificar si el correo electrónico ha sido cambiado y si el nuevo correo ya existe
+            if (email && email !== userToUpdate.email) {
+                const userExists = await checkIfUserExists(email);
+                if (userExists) {
+                    return res.status(400).json({ message: "Email already exists." });
+                }
+            }
+    
+            // Actualizar los campos del usuario si se proporcionan en la solicitud
+            if (name) userToUpdate.name = name;
+            if (email) userToUpdate.email = email;
+            if (password) {
+                // Hashear la nueva contraseña si se proporciona
+                const hashedPassword = bcrypt.hashSync(password, 12);
+                userToUpdate.password = hashedPassword;
+            }
+    
+            // Guardar los cambios en la base de datos
+            await userToUpdate.save();
+    
+            // Responder con el usuario actualizado
+            return res.status(200).json({ message: "User updated successfully.", user: userToUpdate });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+    };
 
 module.exports = {
     signup,
@@ -258,8 +294,9 @@ module.exports = {
     getUser,
     isAdmin,
     toggleUserStatus,
-    createAdmin,
+    changeUserRole,
     refreshToken,
     logout,
-    getAllUsers
+    getAllUsers,
+    updateUser
 };

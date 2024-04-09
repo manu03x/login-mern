@@ -8,7 +8,12 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors({credentials: true, origin: "http://localhost:3000"}))
+const corsOptions = {
+    origin: 'http://localhost:3000', // Reemplaza con el origen correcto de tu aplicación cliente
+    credentials: true, // Permite el envío de cookies y otros datos de autenticación
+    methods:"GET,POST,PUT"
+  };
+app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(express.json());
 app.use('/api', router);
