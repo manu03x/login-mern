@@ -63,7 +63,7 @@ const login = async (req, res, next) => {
             path: '/',
             expires: new Date(Date.now() + 1000 * 30),
             httpOnly: true,
-            sameSite: "lax"
+            sameSite: "none"
         });
 
         return res.status(200).json({ 
