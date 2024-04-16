@@ -63,7 +63,7 @@ const login = async (req, res, next) => {
             path: '/',
             expires: new Date(Date.now() + 1000 * 30),
             httpOnly: true,
-            sameSite: false,
+            sameSite: "none",
             secure: true
         });
 
@@ -146,7 +146,7 @@ const login = async (req, res, next) => {
                 path: '/',
                 expires: new Date(Date.now() + 1000 * 30),
                 httpOnly: true,
-                sameSite: false,
+                sameSite: "none",
                 secure: true
             });
     
