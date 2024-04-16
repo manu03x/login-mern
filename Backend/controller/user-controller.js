@@ -56,12 +56,12 @@ const login = async (req, res, next) => {
             return res.status(401).json({ message: "Invalid Email / Password" });
         }
 
-        const token = jwt.sign({ id: existingUser._id, role: existingUser.role}, process.env.JWT_SECRET_KEY, { expiresIn: "30s" });
+        const token = jwt.sign({ id: existingUser._id, role: existingUser.role}, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
 
         console.log("GENERATED TOKEN\n", token)
         res.cookie("authToken", token, {        
             path: '/',
-            expires: new Date(Date.now() + 1000 * 30),
+            expires: new Date(Date.now() + 3600000),
             httpOnly: true,
             sameSite: "none",
             secure: true
@@ -140,11 +140,11 @@ const login = async (req, res, next) => {
                 return res.status(403).json({ message: "Refresh token invalid" });
             }
     
-            const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "30s" });
+            const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
     
             res.cookie("authToken", accessToken, {
                 path: '/',
-                expires: new Date(Date.now() + 1000 * 30),
+                expires: new Date(Date.now() + 3600000),
                 httpOnly: true,
                 sameSite: "none",
                 secure: true
