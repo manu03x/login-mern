@@ -55,9 +55,41 @@ const getProducts = async (req, res, next) => {
     }
 };
 
+const handlePurchase = async (req, res, next) => {
+    try {
+        const { cart } = req.body;
+
+        // Itera sobre cada producto en el carrito
+        for (const item of cart) {
+            const productId = item._id;
+            const quantity = item.quantity;
+
+            // Busca el producto en la base de datos
+            const product = await Product.findById(productId);
+
+            // Verifica si el producto existe y si hay suficiente stock
+            if (!product || product.stock < quantity) {
+                return res.status(400).json({ message: `No hay suficiente stock para el producto con ID ${productId}.` });
+            }
+
+            // Resta la cantidad comprada del stock del producto
+            product.stock -= quantity;
+
+            // Guarda el producto actualizado en la base de datos
+            await product.save();
+        }
+
+        res.status(200).json({ message: 'Compra realizada con éxito.' });
+    } catch (error) {
+        console.error('Error al manejar la compra:', error);
+        return res.status(500).json({ message: 'Error interno del servidor al manejar la compra.' });
+    }
+};
+
 module.exports = {
     addProduct,
     deleteProduct,
     updateProduct,
-    getProducts
+    getProducts,
+    handlePurchase
 };
