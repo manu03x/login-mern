@@ -10,10 +10,11 @@ require('dotenv').config();
 const app = express();
 
 const corsOptions = {
-    origin: 'http://localhost:3000, https://main--ecommerceseguro.netlify.app', // Reemplaza con el origen correcto de tu aplicación cliente
+    origin: ['http://localhost:3000', 'https://main--ecommerceseguro.netlify.app'], // Arreglo de orígenes permitidos
     credentials: true,
-    optionSuccessStatus:200 // Permite el envío de cookies y otros datos de autenticación
-  };
+    optionSuccessStatus: 200 // Permite el envío de cookies y otros datos de autenticación
+};
+
 app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(express.json());
