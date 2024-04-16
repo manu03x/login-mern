@@ -6,8 +6,8 @@ const { addProduct, deleteProduct, updateProduct, getProducts } = require('../co
 const productsRouter = express.Router();
 
 productsRouter.post("/add", verifyToken, isAdmin, addProduct)
-productsRouter.delete("/delete", verifyToken, isAdmin, deleteProduct)
-productsRouter.put("/update", verifyToken, isAdmin, updateProduct)
+productsRouter.delete("/delete/:productId", verifyToken, isAdmin, deleteProduct)
+productsRouter.put("/update/:productId", verifyToken, isAdmin, updateProduct)
 productsRouter.get("/", verifyToken, getProducts)
 
 
